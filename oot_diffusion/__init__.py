@@ -44,17 +44,11 @@ class OOTDiffusionModel:
 
     def generate(
         self,
-        cloth_path: str
-        | bytes
-        | Path
-        | Image.Image = "https://raw.githubusercontent.com/viktorfa/ComfyUI-OOTDiffusion/main/ootd/assets/cloth_1.jpg",
-        model_path: str
-        | bytes
-        | Path
-        | Image.Image = "https://raw.githubusercontent.com/viktorfa/ComfyUI-OOTDiffusion/main/ootd/assets/model_1.png",
+        cloth_path: str | bytes | Path | Image.Image,
+        model_path: str | bytes | Path | Image.Image,
         seed=0,
-        steps=1,
-        cfg=1.0,
+        steps=10,
+        cfg=2.0,
         num_samples=1,
     ):
         return self.generate_static(
@@ -71,18 +65,12 @@ class OOTDiffusionModel:
     @staticmethod
     def generate_static(
         pipe,
-        cloth_path: str
-        | bytes
-        | Path
-        | Image.Image = "https://raw.githubusercontent.com/viktorfa/ComfyUI-OOTDiffusion/main/ootd/assets/cloth_1.jpg",
-        model_path: str
-        | bytes
-        | Path
-        | Image.Image = "https://raw.githubusercontent.com/viktorfa/ComfyUI-OOTDiffusion/main/ootd/assets/model_1.png",
+        cloth_path: str | bytes | Path | Image.Image,
+        model_path: str | bytes | Path | Image.Image,
         hg_root: str = None,
         seed=0,
-        steps=1,
-        cfg=1.0,
+        steps=10,
+        cfg=2.0,
         num_samples=1,
     ):
         if hg_root is None:
