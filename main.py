@@ -2,23 +2,31 @@ from oot_diffusion import OOTDiffusionModel
 from PIL import Image
 from pathlib import Path
 
-hg_root_path = Path(__file__).parent / "models"
+hg_root_path = Path(__file__).parent / "ootd_models"
 cache_dir_path = Path(__file__).parent / ".hf_cache"
-
-model = OOTDiffusionModel(
-    hg_root=str(hg_root_path),
-    cache_dir=str(cache_dir_path),
-)
 
 
 if __name__ == "__main__":
-    print(model)
-    print(model.load())
+    model = OOTDiffusionModel(
+        hg_root=str(hg_root_path),
+        cache_dir=str(cache_dir_path),
+    )
+    model.load_pipe()
 
-    example_model_path = Path(__file__).parent / "assets/model_1.png"
-    example_garment_path = Path(__file__).parent / "assets/cloth_1.jpg"
+    example_model_path = Path(__file__).parent / "oot_diffusion/assets/model_1.png"
+    example_garment_path = Path(__file__).parent / "oot_diffusion/assets/cloth_1.jpg"
 
     model_image = Image.open(example_model_path)
     garment_image = Image.open(example_garment_path)
 
-    print(model.generate(model, model_image, garment_image))
+    result_images, result_mask = model.generate(
+        model_path=model_image, cloth_path=garment_image
+    )
+
+    with open("output_images/result_mask.png", "wb") as f:
+        result_mask.save(f, "PNG")
+    for i, result_image in enumerate(result_images):
+        with open(f"output_images/result_image_{i}.png", "wb") as f:
+            result_image.save(f, "PNG")
+
+    print("See output_images/ for the result images.")
