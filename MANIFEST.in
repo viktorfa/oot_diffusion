@@ -1,0 +1,4 @@
+recursive-include oot_diffusion/humanparsing/modules/src *.cpp
+recursive-include oot_diffusion/humanparsing/modules/src *.h
+recursive-include oot_diffusion/humanparsing/modules/src *.cu
+recursive-include oot_diffusion/humanparsing/modules/src *.cuh
