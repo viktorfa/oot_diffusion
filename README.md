@@ -9,6 +9,8 @@ Needs CUDA and GPU
 
 OOTDiffusion 的打包版本
 
+[Try on Replicate](https://replicate.com/viktorfa/oot_diffusion)
+
 
 
 ## Instructions
