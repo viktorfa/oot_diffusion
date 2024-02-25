@@ -15,4 +15,3 @@ gradio
 config
 einops
 ninja==1.10.2
-basicsr

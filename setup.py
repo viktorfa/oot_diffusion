@@ -27,7 +27,6 @@ setup(
         "config",
         "einops",
         "ninja==1.10.2",
-        "basicsr",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
