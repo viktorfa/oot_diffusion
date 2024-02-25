@@ -25,7 +25,7 @@ class OpenPose:
             input_image = resize_image(input_image, resolution)
             H, W, C = input_image.shape
             assert H == 512 and W == 384, "Incorrect input image shape"
-            pose = self.preprocessor(input_image, return_is_index=True)
+            pose = self.preprocessor(input_image)
 
             candidate = pose["bodies"]["candidate"]
             subset = pose["bodies"]["subset"][0][:18]
