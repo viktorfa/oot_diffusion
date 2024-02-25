@@ -1,4 +1,4 @@
-# ComfyUI OOTDiffusion
+# OOTDiffusion
 
 A packaged version of [OOTDiffusion](https://github.com/levihsu/OOTDiffusion) that works with Pip.
 
