@@ -69,3 +69,7 @@ display(mask_image)
 The original authors of [OOTDiffusion](https://github.com/levihsu/OOTDiffusion)
 
 The authors of [ComfyUI-OOTDiffusion](https://github.com/AuroBit/ComfyUI-OOTDiffusion), who made it easier to package the code.
+
+## Official implementation
+
+See [oms-Diffusion](https://github.com/ShineChen1024/oms-Diffusion) for the official implementation of OOTDiffusion. 
