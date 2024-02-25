@@ -1,6 +1,5 @@
 torch
 torchvision
-torchaudio
 numpy
 scipy
 scikit-image
@@ -12,5 +11,4 @@ accelerate
 matplotlib
 tqdm
 config
-einops
 ninja==1.10.2

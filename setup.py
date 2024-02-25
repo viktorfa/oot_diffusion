@@ -12,7 +12,6 @@ setup(
     install_requires=[
         "torch",
         "torchvision",
-        "torchaudio",
         "numpy",
         "scipy",
         "scikit-image",
@@ -24,7 +23,6 @@ setup(
         "matplotlib",
         "tqdm",
         "config",
-        "einops",
         "ninja==1.10.2",
     ],
     classifiers=[
