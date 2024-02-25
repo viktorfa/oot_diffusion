@@ -1,5 +1,4 @@
 from .parsing_api import load_atr_model, load_lip_model, inference
-import torch
 
 
 class Parsing:

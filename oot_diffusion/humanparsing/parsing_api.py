@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import os
 import torch
 import numpy as np
@@ -133,26 +131,7 @@ def refine_hole(parsing_result_filled, parsing_result, arm_mask):
 def load_atr_model(hg_root: str):
     # load atr model
     num_classes = 18
-    label = [
-        "Background",
-        "Hat",
-        "Hair",
-        "Sunglasses",
-        "Upper-clothes",
-        "Skirt",
-        "Pants",
-        "Dress",
-        "Belt",
-        "Left-shoe",
-        "Right-shoe",
-        "Face",
-        "Left-leg",
-        "Right-leg",
-        "Left-arm",
-        "Right-arm",
-        "Bag",
-        "Scarf",
-    ]
+
     model = networks.init_model("resnet101", num_classes=num_classes, pretrained=None)
     #! annotated config
     state_dict = torch.load(
@@ -172,28 +151,7 @@ def load_atr_model(hg_root: str):
 def load_lip_model(hg_root: str):
     # load atr model
     num_classes = 20
-    label = [
-        "Background",
-        "Hat",
-        "Hair",
-        "Glove",
-        "Sunglasses",
-        "Upper-clothes",
-        "Dress",
-        "Coat",
-        "Socks",
-        "Pants",
-        "Jumpsuits",
-        "Scarf",
-        "Skirt",
-        "Face",
-        "Left-arm",
-        "Right-arm",
-        "Left-leg",
-        "Right-leg",
-        "Left-shoe",
-        "Right-shoe",
-    ]
+
     model = networks.init_model("resnet101", num_classes=num_classes, pretrained=None)
     #! annotated config
     state_dict = torch.load(
@@ -311,7 +269,6 @@ def inference(model, lip_model, input_dir):
     # Image.fromarray(((neck_mask > 0) * 127.5 + 127.5).astype(np.uint8)).save("neck_mask.jpg")
     parsing_result = np.where(neck_mask, 18, parsing_result)
     palette = get_palette(19)
-    parsing_result_path = os.path.join("parsed.png")
     output_img = Image.fromarray(np.asarray(parsing_result, dtype=np.uint8))
     output_img.putpalette(palette)
     # output_img.save(parsing_result_path)

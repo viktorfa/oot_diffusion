@@ -1,30 +1,12 @@
-import pdb
-
-import config
-from pathlib import Path
-import sys
-
-PROJECT_ROOT = Path(__file__).absolute().parents[0].absolute()
-sys.path.insert(0, str(PROJECT_ROOT))
-import os
-
-import cv2
-import einops
 import numpy as np
-import random
-import time
-import json
+
 
 # from pytorch_lightning import seed_everything
 from .annotator.util import resize_image, HWC3
 from .annotator.openpose import OpenposeDetector
 
-import argparse
 from PIL import Image
 import torch
-import pdb
-
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 
 
 class OpenPose:
@@ -43,7 +25,7 @@ class OpenPose:
             input_image = resize_image(input_image, resolution)
             H, W, C = input_image.shape
             assert H == 512 and W == 384, "Incorrect input image shape"
-            pose, detected_map = self.preprocessor(input_image, hand_and_face=False)
+            pose = self.preprocessor(input_image, return_is_index=True)
 
             candidate = pose["bodies"]["candidate"]
             subset = pose["bodies"]["subset"][0][:18]
@@ -66,11 +48,5 @@ class OpenPose:
                 candidate[i][1] *= 512
 
             keypoints = {"pose_keypoints_2d": candidate}
-            # with open("/home/aigc/ProjectVTON/OpenPose/keypoints/keypoints.json", "w") as f:
-            #     json.dump(keypoints, f)
-            #
-            # # print(candidate)
-            # output_image = cv2.resize(cv2.cvtColor(detected_map, cv2.COLOR_BGR2RGB), (768, 1024))
-            # cv2.imwrite('/home/aigc/ProjectVTON/OpenPose/keypoints/out_pose.jpg', output_image)
 
         return keypoints
