@@ -23,7 +23,6 @@ setup(
         "accelerate",
         "matplotlib",
         "tqdm",
-        "gradio",
         "config",
         "einops",
         "ninja==1.10.2",
