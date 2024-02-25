@@ -69,6 +69,8 @@ class OpenposeDetector:
         #     from basicsr.utils.download_util import load_file_from_url
         #     load_file_from_url(face_model_path, model_dir=annotator_ckpts_path)
 
+        print("body_modelpath: ", body_modelpath)
+
         self.body_estimation = Body(body_modelpath)
         # self.hand_estimation = Hand(hand_modelpath)
         # self.face_estimation = Face(face_modelpath)
