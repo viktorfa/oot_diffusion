@@ -15,7 +15,6 @@ from . import util
 from .body import Body
 from .hand import Hand
 from .face import Face
-from annotator.util import annotator_ckpts_path
 
 body_model_path = (
     "https://huggingface.co/lllyasviel/Annotators/resolve/main/body_pose_model.pth"
@@ -49,8 +48,12 @@ def draw_pose(pose, H, W, draw_body=True, draw_hand=True, draw_face=True):
 
 
 class OpenposeDetector:
-    def __init__(self):
-        body_modelpath = os.path.join(annotator_ckpts_path, "body_pose_model.pth")
+    def __init__(self, hg_root: str):
+        body_modelpath = os.path.join(
+            hg_root,
+            "checkpoints/openpose/ckpts",
+            "body_pose_model.pth",
+        )
         # hand_modelpath = os.path.join(annotator_ckpts_path, "hand_pose_model.pth")
         # face_modelpath = os.path.join(annotator_ckpts_path, "facenet.pth")
 

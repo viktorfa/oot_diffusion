@@ -90,7 +90,7 @@ class OOTDiffusionModel:
         cloth_image = cloth_image.resize((768, 1024))
 
         model_parse, _ = Parsing(pipe.device, hg_root)(model_image.resize((384, 512)))
-        keypoints = OpenPose()(model_image.resize((384, 512)))
+        keypoints = OpenPose(hg_root)(model_image.resize((384, 512)))
         mask, mask_gray = get_mask_location(
             pipe.model_type,
             _category_get_mask_input[category],

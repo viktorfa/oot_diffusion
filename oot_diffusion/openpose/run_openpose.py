@@ -26,9 +26,10 @@ import pdb
 
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 
+
 class OpenPose:
-    def __init__(self):
-        self.preprocessor = OpenposeDetector()
+    def __init__(self, hg_root: str):
+        self.preprocessor = OpenposeDetector(hg_root=hg_root)
 
     def __call__(self, input_image, resolution=384):
         if isinstance(input_image, Image.Image):
@@ -41,21 +42,21 @@ class OpenPose:
             input_image = HWC3(input_image)
             input_image = resize_image(input_image, resolution)
             H, W, C = input_image.shape
-            assert (H == 512 and W == 384), 'Incorrect input image shape'
+            assert H == 512 and W == 384, "Incorrect input image shape"
             pose, detected_map = self.preprocessor(input_image, hand_and_face=False)
 
-            candidate = pose['bodies']['candidate']
-            subset = pose['bodies']['subset'][0][:18]
+            candidate = pose["bodies"]["candidate"]
+            subset = pose["bodies"]["subset"][0][:18]
             for i in range(18):
                 if subset[i] == -1:
                     candidate.insert(i, [0, 0])
                     for j in range(i, 18):
-                        if(subset[j]) != -1:
+                        if (subset[j]) != -1:
                             subset[j] += 1
                 elif subset[i] != i:
                     candidate.pop(i)
                     for j in range(i, 18):
-                        if(subset[j]) != -1:
+                        if (subset[j]) != -1:
                             subset[j] -= 1
 
             candidate = candidate[:18]
@@ -73,9 +74,3 @@ class OpenPose:
             # cv2.imwrite('/home/aigc/ProjectVTON/OpenPose/keypoints/out_pose.jpg', output_image)
 
         return keypoints
-
-
-if __name__ == '__main__':
-
-    model = OpenPose()
-    model('./images/bad_model.jpg')
