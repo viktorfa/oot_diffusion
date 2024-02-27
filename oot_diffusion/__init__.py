@@ -81,16 +81,19 @@ class OOTDiffusionModel:
             model_image = model_path
         else:
             model_image = Image.open(model_path)
-        model_image = resize_crop_center(model_image, 384, 512)
+        model_image = resize_crop_center(model_image, 768, 1024)
         cloth_image = cloth_image.resize((768, 1024))
 
         (
             masked_vton_img,
             mask,
-            model_image,
-            model_parse,
-            face_mask,
+            _,
+            _,
+            _,
         ) = cmm.generate(model_image)
+
+        mask = mask.resize((768, 1024), Image.NEAREST)
+        masked_vton_img = masked_vton_img.resize((768, 1024), Image.NEAREST)
 
         images = pipe(
             category=category,
