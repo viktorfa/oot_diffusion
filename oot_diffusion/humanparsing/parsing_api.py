@@ -108,6 +108,19 @@ def refine_mask(mask):
     return refine_mask
 
 
+def remove_outliers(
+    image: np.ndarray,
+):
+    image = image.astype(np.uint8)
+
+    # Define a kernel size for the morphological operation
+    kernel_size = 3  # You can adjust this to be larger if the noise dots are bigger
+    kernel = np.ones((kernel_size, kernel_size), np.uint8)
+
+    # Perform morphological opening
+    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+
 def refine_hole(parsing_result_filled, parsing_result, arm_mask):
     filled_hole = (
         cv2.bitwise_and(
@@ -273,5 +286,6 @@ def inference(model, lip_model, input_dir):
     output_img.putpalette(palette)
     # output_img.save(parsing_result_path)
     face_mask = np.isin(parsing_result, [1, 2, 3, 11]).astype(np.float32)
+    face_mask = remove_outliers(face_mask)
 
     return output_img, face_mask
