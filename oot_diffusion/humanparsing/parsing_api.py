@@ -272,12 +272,7 @@ def inference(model, lip_model, input_dir):
     output_img = Image.fromarray(np.asarray(parsing_result, dtype=np.uint8))
     output_img.putpalette(palette)
     # output_img.save(parsing_result_path)
-    face_mask = np.logical_or(
-        (parsing_result == 1).astype(np.float32),
-        (parsing_result == 2).astype(np.float32),
-        (parsing_result == 3).astype(np.float32),
-        (parsing_result == 11).astype(np.float32),
-    )
+    face_mask = np.isin(parsing_result, [1, 2, 3, 11]).astype(np.float32)
     face_mask = refine_mask(face_mask)
 
     return output_img, face_mask
