@@ -9,7 +9,7 @@ from .ootd_utils import resize_crop_center
 DEFAULT_HG_ROOT = Path(os.getcwd()) / "oodt_models"
 
 
-class OOTDiffusionModel:
+class OOTDiffusionWithMaskModel:
     def __init__(self, hg_root: str = None, cache_dir: str = None):
         """
         Args:
@@ -37,15 +37,17 @@ class OOTDiffusionModel:
         self,
         cloth_path: str | bytes | Path | Image.Image,
         model_path: str | bytes | Path | Image.Image,
+        model_mask_path: str | bytes | Path | Image.Image,
         seed: int = 0,
         steps: int = 10,
         cfg: float = 2.0,
         num_samples: int = 1,
-    ):
+    ) -> list[Image.Image]:
         return self.generate_static(
             self.get_pipe(),
             cloth_path,
             model_path,
+            model_mask_path,
             self.hg_root,
             seed,
             steps,
@@ -64,7 +66,7 @@ class OOTDiffusionModel:
         steps: int = 10,
         cfg: float = 2.0,
         num_samples: int = 1,
-    ):
+    ) -> list[Image.Image]:
         if hg_root is None:
             hg_root = DEFAULT_HG_ROOT
 
