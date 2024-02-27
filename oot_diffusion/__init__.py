@@ -82,7 +82,7 @@ class OOTDiffusionModel:
         else:
             model_image = Image.open(model_path)
         model_image = resize_crop_center(model_image, 768, 1024)
-        cloth_image = cloth_image.resize((768, 1024))
+        cloth_image = resize_crop_center(cloth_image, 768, 1024)
 
         (
             masked_vton_img,
