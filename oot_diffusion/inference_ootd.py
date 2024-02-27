@@ -1,4 +1,5 @@
 import random
+import sys
 import time
 from pathlib import Path
 
@@ -6,6 +7,10 @@ from huggingface_hub import snapshot_download
 import torch
 from diffusers import AutoencoderKL, UniPCMultistepScheduler
 
+from . import pipelines_ootd
+
+#! Necessary for OotdPipeline.from_pretrained
+sys.modules["pipelines_ootd"] = pipelines_ootd
 
 from .pipelines_ootd.pipeline_ootd import OotdPipeline
 from .pipelines_ootd.unet_garm_2d_condition import UNetGarm2DConditionModel
