@@ -1,6 +1,7 @@
 import os
-from PIL import Image
+from PIL import Image, ImageOps
 from pathlib import Path
+from huggingface_hub import snapshot_download
 
 from .inference_ootd import OOTDiffusion
 from .ootd_utils import resize_crop_center
@@ -22,6 +23,16 @@ class OOTDiffusionWithMaskModel:
         self.cache_dir = cache_dir
 
     def load_pipe(self):
+        VAE_PATH = f"{self.hg_root}/checkpoints/ootd"
+        if not Path(VAE_PATH).exists():
+            print("Downloading VAE model")
+            snapshot_download(
+                "levihsu/OOTDiffusion",
+                cache_dir=self.cache_dir,
+                local_dir=self.hg_root,
+                allow_patterns=["**/ootd/**"],
+            )
+
         self.pipe = OOTDiffusion(
             hg_root=self.hg_root,
             cache_dir=self.cache_dir,
@@ -85,9 +96,9 @@ class OOTDiffusionWithMaskModel:
         else:
             model_mask_image = Image.open(model_mask_path)
 
-        cloth_image = cloth_image.resize((768, 1024))
-        model_image = resize_crop_center(model_image, 384, 512)
-        model_mask_image = model_mask_image.resize((384, 512), Image.LANCZOS)
+        model_image = resize_crop_center(model_image, 768, 1024)
+        cloth_image = resize_crop_center(cloth_image, 768, 1024)
+        model_mask_image = model_mask_image.resize((768, 1024), Image.LANCZOS)
 
         gray_image = Image.new("L", model_image.size, 127)
         # Create an RGBA version of the original image
@@ -97,12 +108,16 @@ class OOTDiffusionWithMaskModel:
         # The alpha channel is the inverted binary mask where the masked areas are 0 (transparent)
         gray_rgba = Image.merge(
             "RGBA",
-            (gray_image, gray_image, gray_image, ImageOps.invert(model_mask_image)),
+            (
+                gray_image,
+                gray_image,
+                gray_image,
+                ImageOps.invert(model_mask_image.convert("L")),
+            ),
         )
 
         # Composite the images together using the binary mask as the alpha mask
         masked_vton_img = Image.composite(gray_rgba, original_rgba, model_mask_image)
-
         masked_vton_img = masked_vton_img.convert("RGB")
 
         images = pipe(
