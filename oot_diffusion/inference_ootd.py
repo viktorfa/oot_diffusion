@@ -6,6 +6,12 @@ from pathlib import Path
 from huggingface_hub import snapshot_download
 import torch
 from diffusers import AutoencoderKL, UniPCMultistepScheduler
+from transformers import (
+    AutoProcessor,
+    CLIPTextModel,
+    CLIPTokenizer,
+    CLIPVisionModelWithProjection,
+)
 
 from . import pipelines_ootd
 
@@ -47,7 +53,7 @@ class OOTDiffusion:
         MODEL_PATH = f"{hg_root}/checkpoints/ootd"
 
         vae = AutoencoderKL.from_pretrained(
-            "stabilityai/sd-vae-ft-mse", torch_dtype=torch.float16, cache_dir=cache_dir
+            VAE_PATH, subfolder="vae", torch_dtype=torch.float16, cache_dir=cache_dir
         )
         unet_garm = UNetGarm2DConditionModel.from_pretrained(
             UNET_PATH,
