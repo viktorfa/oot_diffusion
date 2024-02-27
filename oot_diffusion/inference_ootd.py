@@ -1,23 +1,11 @@
 import random
-import sys
 import time
 from pathlib import Path
 
 from huggingface_hub import snapshot_download
 import torch
 from diffusers import AutoencoderKL, UniPCMultistepScheduler
-from transformers import (
-    AutoProcessor,
-    CLIPTextModel,
-    CLIPTokenizer,
-    CLIPVisionModelWithProjection,
-)
 
-# sys.path.append(str(Path(__file__).parent))
-from . import pipelines_ootd
-
-#! Necessary for OotdPipeline.from_pretrained
-sys.modules["pipelines_ootd"] = pipelines_ootd
 
 from .pipelines_ootd.pipeline_ootd import OotdPipeline
 from .pipelines_ootd.unet_garm_2d_condition import UNetGarm2DConditionModel
@@ -54,7 +42,7 @@ class OOTDiffusion:
         MODEL_PATH = f"{hg_root}/checkpoints/ootd"
 
         vae = AutoencoderKL.from_pretrained(
-            VAE_PATH, subfolder="vae", torch_dtype=torch.float16, cache_dir=cache_dir
+            "stabilityai/sd-vae-ft-mse", torch_dtype=torch.float16, cache_dir=cache_dir
         )
         unet_garm = UNetGarm2DConditionModel.from_pretrained(
             UNET_PATH,

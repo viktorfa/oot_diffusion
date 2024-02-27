@@ -7,7 +7,7 @@ import torch
 
 
 from oot_diffusion.humanparsing.aigc_run_parsing import Parsing
-from oot_diffusion.ootd_utils import get_mask_location
+from oot_diffusion.ootd_utils import get_mask_location, resize_crop_center
 from oot_diffusion.openpose.run_openpose import OpenPose
 
 
@@ -67,28 +67,8 @@ class ClothesMaskModel:
             model_image = model_path
         else:
             model_image = Image.open(model_path)
-        # model_image = model_image.resize((768, 1024), Image.NEAREST)
 
-        aspect_ratio = 384 / 512
-
-        # Current size
-        width, height = model_image.size
-
-        # Compute new dimensions based on the aspect ratio
-        new_width = height * aspect_ratio if width > height else width
-        new_height = width / aspect_ratio if width < height else height
-
-        # Compute coordinates to crop the image around the center
-        left = (width - new_width) / 2
-        top = (height - new_height) / 2
-        right = (width + new_width) / 2
-        bottom = (height + new_height) / 2
-
-        # Perform the crop
-        model_image = model_image.crop((left, top, right, bottom))
-
-        # Optionally, resize to your target dimensions if needed
-        model_image = model_image.resize((384, 512), Image.LANCZOS)
+        model_image = resize_crop_center(model_image, 384, 512)
 
         start_model_parse = time.perf_counter()
 

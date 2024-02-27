@@ -2,18 +2,10 @@ import os
 from PIL import Image
 from pathlib import Path
 
-
-from .humanparsing.aigc_run_parsing import Parsing
+from oot_diffusion.inference_segmentation import ClothesMaskModel
 from .inference_ootd import OOTDiffusion
-from .ootd_utils import get_mask_location
-from .openpose.run_openpose import OpenPose
+from .ootd_utils import resize_crop_center
 
-
-_category_get_mask_input = {
-    "upperbody": "upper_body",
-    "lowerbody": "lower_body",
-    "dress": "dresses",
-}
 
 DEFAULT_HG_ROOT = Path(os.getcwd()) / "oodt_models"
 
@@ -35,6 +27,7 @@ class OOTDiffusionModel:
             hg_root=self.hg_root,
             cache_dir=self.cache_dir,
         )
+        self.cmm = ClothesMaskModel(hg_root=self.hg_root, cache_dir=self.cache_dir)
         return self.pipe
 
     def get_pipe(self):
@@ -46,13 +39,14 @@ class OOTDiffusionModel:
         self,
         cloth_path: str | bytes | Path | Image.Image,
         model_path: str | bytes | Path | Image.Image,
-        seed=0,
-        steps=10,
-        cfg=2.0,
-        num_samples=1,
+        seed: int = 0,
+        steps: int = 10,
+        cfg: float = 2.0,
+        num_samples: int = 1,
     ):
         return self.generate_static(
             self.get_pipe(),
+            self.cmm,
             cloth_path,
             model_path,
             self.hg_root,
@@ -64,14 +58,15 @@ class OOTDiffusionModel:
 
     @staticmethod
     def generate_static(
-        pipe,
+        pipe: OOTDiffusion,
+        cmm: ClothesMaskModel,
         cloth_path: str | bytes | Path | Image.Image,
         model_path: str | bytes | Path | Image.Image,
         hg_root: str = None,
-        seed=0,
-        steps=10,
-        cfg=2.0,
-        num_samples=1,
+        seed: int = 0,
+        steps: int = 10,
+        cfg: float = 2.0,
+        num_samples: int = 1,
     ):
         if hg_root is None:
             hg_root = DEFAULT_HG_ROOT
@@ -86,23 +81,17 @@ class OOTDiffusionModel:
             model_image = model_path
         else:
             model_image = Image.open(model_path)
-        model_image = model_image.resize((768, 1024))
+        model_image = resize_crop_center(model_image, 384, 512)
         cloth_image = cloth_image.resize((768, 1024))
 
-        model_parse, _ = Parsing(pipe.device, hg_root)(model_image.resize((384, 512)))
-        keypoints = OpenPose(hg_root)(model_image.resize((384, 512)))
-        mask, mask_gray = get_mask_location(
-            pipe.model_type,
-            _category_get_mask_input[category],
+        (
+            masked_vton_img,
+            mask,
+            model_image,
             model_parse,
-            keypoints,
-            width=384,
-            height=512,
-        )
-        mask = mask.resize((768, 1024), Image.NEAREST)
-        mask_gray = mask_gray.resize((768, 1024), Image.NEAREST)
+            face_mask,
+        ) = cmm.generate(model_image)
 
-        masked_vton_img = Image.composite(mask_gray, model_image, mask)
         images = pipe(
             category=category,
             image_garm=cloth_image,
