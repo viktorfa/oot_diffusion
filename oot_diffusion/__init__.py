@@ -81,8 +81,8 @@ class OOTDiffusionModel:
             model_image = model_path
         else:
             model_image = Image.open(model_path)
-        model_image = resize_crop_center(model_image, 768, 1024)
-        cloth_image = resize_crop_center(cloth_image, 768, 1024)
+        model_image = resize_crop_center(model_image, 768, 1024).convert("RGB")
+        cloth_image = resize_crop_center(cloth_image, 768, 1024).convert("RGB")
 
         (
             masked_vton_img,

@@ -80,7 +80,7 @@ class ClothesMaskModel:
         else:
             model_image = Image.open(model_path)
 
-        model_image = resize_crop_center(model_image, 384, 512)
+        model_image = resize_crop_center(model_image, 384, 512).convert("RGB")
 
         start_model_parse = time.perf_counter()
 
