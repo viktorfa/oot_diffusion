@@ -7,9 +7,10 @@ from oot_diffusion.humanparsing.utils import find_midpoint_y, label_map, get_pal
 
 
 class BodyParsingModel:
-    def __init__(self, hg_root: str = None, cache_dir: str = None):
+    def __init__(self, device: str = "cpu", hg_root: str = None, cache_dir: str = None):
         self.hg_root = hg_root
         self.cache_dir = cache_dir
+        self.device = device
 
     def load_model(self):
         self.processor_face = SegformerImageProcessor.from_pretrained(
