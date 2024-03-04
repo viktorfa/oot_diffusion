@@ -16,4 +16,4 @@ class PoseModel:
             image,
         )
 
-        return {"pose_keypoints_2d": pose_results[0].keypoints[0].xy.numpy()[0]}
+        return {"pose_keypoints_2d": pose_results[0].keypoints[0].xy.cpu().numpy()[0]}

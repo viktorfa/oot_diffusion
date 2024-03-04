@@ -20,7 +20,8 @@ class BodyParsingModel:
         self.model_face = AutoModelForSemanticSegmentation.from_pretrained(
             "jonathandinu/face-parsing",
             cache_dir=self.cache_dir,
-        ).to(self.device)
+        )
+        self.model_face.to(self.device)
 
         self.processor_clothes = SegformerImageProcessor.from_pretrained(
             "mattmdjaga/segformer_b2_clothes",
@@ -29,7 +30,8 @@ class BodyParsingModel:
         self.model_clothes = AutoModelForSemanticSegmentation.from_pretrained(
             "mattmdjaga/segformer_b2_clothes",
             cache_dir=self.cache_dir,
-        ).to(self.device)
+        )
+        self.model_clothes.to(self.device)
 
     def infer_parse_model(self, image: Image.Image):
         inputs_face = self.processor_face(images=image, return_tensors="pt").to(
@@ -37,7 +39,7 @@ class BodyParsingModel:
         )
 
         outputs_face = self.model_face(**inputs_face)
-        logits_face = outputs_face.logits
+        logits_face = outputs_face.logits.cpu()
 
         upsampled_logits_face = nn.functional.interpolate(
             logits_face,
@@ -53,7 +55,7 @@ class BodyParsingModel:
         )
 
         outputs_clothes = self.model_clothes(**inputs_clothes)
-        logits_clothes = outputs_clothes.logits
+        logits_clothes = outputs_clothes.logits.cpu()
 
         upsampled_logits_clothes = nn.functional.interpolate(
             logits_clothes,
