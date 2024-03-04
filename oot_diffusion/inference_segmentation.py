@@ -1,14 +1,10 @@
 import os
 from PIL import Image
 from pathlib import Path
-from huggingface_hub import snapshot_download
 import time
-import torch
-
-
-from oot_diffusion.humanparsing.aigc_run_parsing import Parsing
+from oot_diffusion.humanparsing.inference import BodyParsingModel
 from oot_diffusion.ootd_utils import get_mask_location, resize_crop_center
-from oot_diffusion.openpose.run_openpose import OpenPose
+from oot_diffusion.openpose.inference import PoseModel
 
 
 _category_get_mask_input = {
@@ -31,18 +27,6 @@ class ClothesMaskModel:
             hg_root = DEFAULT_HG_ROOT
         self.hg_root = hg_root
         self.cache_dir = cache_dir
-
-        SEGMENTATION_PATH = f"{self.hg_root}/checkpoints/humanparsing"
-        OPENPOSE_PATH = f"{self.hg_root}/checkpoints/openpose"
-
-        if not Path(SEGMENTATION_PATH).exists() or not Path(OPENPOSE_PATH).exists():
-            print("Downloading segmentation models")
-            snapshot_download(
-                "levihsu/OOTDiffusion",
-                cache_dir=cache_dir,
-                local_dir=hg_root,
-                allow_patterns=["**/humanparsing/**", "**/openpose/**"],
-            )
 
     def generate(
         self,
@@ -70,17 +54,36 @@ class ClothesMaskModel:
 
         model_image = resize_crop_center(model_image, 384, 512)
 
+        start_model_parse_load = time.perf_counter()
+
+        human_parsing_model = BodyParsingModel(hg_root=hg_root, cache_dir=None)
+        human_parsing_model.load_model()
+
+        end_model_parse_load = time.perf_counter()
+        print(
+            f"Model parse load in {end_model_parse_load - start_model_parse_load:.2f} seconds."
+        )
+
         start_model_parse = time.perf_counter()
 
-        model_parse, face_mask = Parsing(
-            torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu"),
-            hg_root,
-        )(model_image)
+        model_parse, _, face_mask = human_parsing_model.infer_parse_model(model_image)
         end_model_parse = time.perf_counter()
         print(f"Model parse in {end_model_parse - start_model_parse:.2f} seconds.")
+
+        start_pose_load = time.perf_counter()
+
+        pose_model = PoseModel(
+            hg_root=hg_root,
+            cache_dir=None,
+        )
+        pose_model.load_pose_model()
+
+        end_pose_load = time.perf_counter()
+        print(f"Pose load in {end_pose_load - start_pose_load:.2f} seconds.")
+
         start_open_pose = time.perf_counter()
 
-        keypoints = OpenPose(hg_root)(model_image)
+        keypoints = pose_model.infer_keypoints(model_image)
         end_open_pose = time.perf_counter()
         print(f"Open pose in {end_open_pose - start_open_pose:.2f} seconds.")
         mask, mask_gray = get_mask_location(
@@ -102,5 +105,5 @@ class ClothesMaskModel:
             mask,
             model_image,
             model_parse,
-            Image.fromarray(face_mask * 255),
+            face_mask,
         )

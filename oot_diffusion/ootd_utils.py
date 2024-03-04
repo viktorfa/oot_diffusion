@@ -1,27 +1,9 @@
+from typing import Literal
 import numpy as np
 import cv2
 from PIL import Image, ImageDraw
 
-label_map = {
-    "background": 0,
-    "hat": 1,
-    "hair": 2,
-    "sunglasses": 3,
-    "upper_clothes": 4,
-    "skirt": 5,
-    "pants": 6,
-    "dress": 7,
-    "belt": 8,
-    "left_shoe": 9,
-    "right_shoe": 10,
-    "head": 11,
-    "left_leg": 12,
-    "right_leg": 13,
-    "left_arm": 14,
-    "right_arm": 15,
-    "bag": 16,
-    "scarf": 17,
-}
+from oot_diffusion.humanparsing.utils import label_map, remove_outliers
 
 
 def extend_arm_mask(wrist, elbow, scale):
@@ -29,7 +11,7 @@ def extend_arm_mask(wrist, elbow, scale):
     return wrist
 
 
-def hole_fill(img):
+def hole_fill_ootd(img: np.ndarray):
     img = np.pad(img[1:-1, 1:-1], pad_width=1, mode="constant", constant_values=0)
     img_copy = img.copy()
     mask = np.zeros((img.shape[0] + 2, img.shape[1] + 2), dtype=np.uint8)
@@ -40,7 +22,7 @@ def hole_fill(img):
     return dst
 
 
-def refine_mask(mask):
+def refine_mask_ootd(mask):
     contours, hierarchy = cv2.findContours(
         mask.astype(np.uint8), cv2.RETR_CCOMP, cv2.CHAIN_APPROX_TC89_L1
     )
@@ -57,12 +39,12 @@ def refine_mask(mask):
 
 
 def get_mask_location(
-    model_type,
-    category,
+    model_type: Literal["hd", "dc"],
+    category: Literal["upper_body", "lower_body", "dresses"],
     model_parse: Image.Image,
     keypoint: dict,
-    width=384,
-    height=512,
+    width: int = 384,
+    height: int = 512,
 ):
     im_parse = model_parse.resize((width, height), Image.NEAREST)
     parse_array = np.array(im_parse)
@@ -137,20 +119,20 @@ def get_mask_location(
 
     # Load pose points
     pose_data = keypoint["pose_keypoints_2d"]
-    pose_data = np.array(pose_data)
-    pose_data = pose_data.reshape((-1, 2))
+    # pose_data = np.array(pose_data)
+    # pose_data = pose_data.reshape((-1, 2))
 
     im_arms_left = Image.new("L", (width, height))
     im_arms_right = Image.new("L", (width, height))
     arms_draw_left = ImageDraw.Draw(im_arms_left)
     arms_draw_right = ImageDraw.Draw(im_arms_right)
     if category == "dresses" or category == "upper_body":
-        shoulder_right = np.multiply(tuple(pose_data[2][:2]), height / 512.0)
         shoulder_left = np.multiply(tuple(pose_data[5][:2]), height / 512.0)
-        elbow_right = np.multiply(tuple(pose_data[3][:2]), height / 512.0)
-        elbow_left = np.multiply(tuple(pose_data[6][:2]), height / 512.0)
-        wrist_right = np.multiply(tuple(pose_data[4][:2]), height / 512.0)
-        wrist_left = np.multiply(tuple(pose_data[7][:2]), height / 512.0)
+        shoulder_right = np.multiply(tuple(pose_data[6][:2]), height / 512.0)
+        elbow_left = np.multiply(tuple(pose_data[7][:2]), height / 512.0)
+        elbow_right = np.multiply(tuple(pose_data[8][:2]), height / 512.0)
+        wrist_left = np.multiply(tuple(pose_data[9][:2]), height / 512.0)
+        wrist_right = np.multiply(tuple(pose_data[10][:2]), height / 512.0)
         ARM_LINE_WIDTH = int(arm_width / 512 * height)
         size_left = [
             shoulder_left[0] - ARM_LINE_WIDTH // 2,
@@ -216,8 +198,9 @@ def get_mask_location(
     parse_mask_total = np.logical_or(parse_mask, parser_mask_fixed)
     inpaint_mask = 1 - parse_mask_total
     img = np.where(inpaint_mask, 255, 0)
-    dst = hole_fill(img.astype(np.uint8))
-    dst = refine_mask(dst)
+    dst = hole_fill_ootd(img.astype(np.uint8))
+    dst = remove_outliers(img.astype(np.uint8))
+    dst = refine_mask_ootd(dst)
     inpaint_mask = dst / 255 * 1
     mask = Image.fromarray(inpaint_mask.astype(np.uint8) * 255)
     mask_gray = Image.fromarray(inpaint_mask.astype(np.uint8) * 127)
