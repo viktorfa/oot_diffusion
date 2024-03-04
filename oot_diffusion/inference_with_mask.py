@@ -98,8 +98,10 @@ class OOTDiffusionWithMaskModel:
 
         model_image = resize_crop_center(model_image, 768, 1024)
         cloth_image = resize_crop_center(cloth_image, 768, 1024)
-        model_mask_image = model_mask_image.resize((768, 1024), Image.LANCZOS).convert(
-            "L"
+        model_mask_image = (
+            model_mask_image.resize((768, 1024), Image.LANCZOS)
+            .convert("RGB")
+            .convert("L")
         )
 
         gray_image = Image.new("L", model_image.size, 127)
