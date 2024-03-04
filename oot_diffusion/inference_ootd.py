@@ -44,6 +44,7 @@ class OOTDiffusion:
                 "levihsu/OOTDiffusion",
                 cache_dir=cache_dir,
                 local_dir=hg_root,
+                allow_patterns=["**/ootd/**"],
             )
 
         if model_type == "hd":
