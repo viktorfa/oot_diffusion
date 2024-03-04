@@ -20,10 +20,8 @@ setup(
         "diffusers==0.24.0",
         "transformers",
         "accelerate",
-        "matplotlib",
         "tqdm",
-        "config",
-        "ninja==1.10.2",
+        "ultralytics",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
